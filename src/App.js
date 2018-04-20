@@ -4,107 +4,144 @@ import './App.css';
 
 import User from './components/User';
 import Hobby from './components/Hobby';
-
+import Toies from './components/Toies';
+import ToyForm from './components/ToyForm';
+import Cart from './components/Cart';
+import base from './base';
+import ToyModel from './models/ToyModel';
 class App extends Component {
   constructor(props) {
 		super(props);
-		   
 		this.state = {
-			hobbies:['tennis', 'foot'],
+			toies : {
+        
+      },
+      basket:{
+
+      },
+      toyModel:new ToyModel(),
+      amount:0
+      
 		}
 	}
 	
-  addHobby() {
-		let oldHobbies = this.state.hobbies;
-		this.setState({
-			hobbies: oldHobbies.concat(this.input.value)
-    });
-    
-    this.input.value = "";
+  addToy() {
+		  const toies = {...this.state.toies};
+ 
+      // Ajouter le nouveau hobby
+      var count = Object.keys(toies).length;
+      const timestamp = Date.now();
+     toies[`toy-${count+1}`] = {
+        id:count+1,
+        name: this.state.toyModel.name.value,
+        description: '',
+        price:this.state.toyModel.price.value,
+        imageUrl:this.state.toyModel.imageUrl.value
+      };
+        
+      
+      this.setState({toies});
+      console.log("Test Test ");
   }
+
+
+  addToBasket(key){
+
+    const toies = {...this.state.toies};
+    const basket ={...this.state.basket};
+    var count = Object.keys(basket).length;
+    if(basket[key]!=undefined){
+      var b=basket[key];
+      b.quantity=b.quantity+1;
+    }
+    else{
+      toies[key].quantity=1;
+      basket[key]=toies[key];
+    }   
+    this.state.amount=this.state.amount+parseInt(toies[key].price);
+      
+    console.log(basket);
+    this.setState({basket});
+
+  }
+
+  order(){
+    this.state.basket=null;
+    const basket ={...this.state.basket};
+    this.state.amount=0;
+    this.setState({basket});
+    console.log("test test" +this.state.amount);
+  }
+  removeToBasket(key){
+    const basket ={...this.state.basket};
+    this.state.amount=this.state.amount-(parseInt(basket[key].price)*basket[key].quantity);
+    delete basket[key];
+    this.setState({basket});
+  }
+
   
-  removeHobby(hobby) {
-		/*
-		let oldHobbies = this.state.hobbies;
-		let pos = this.state.hobbies.indexOf(hobby);
-		oldHobbies.splice(pos, 1);
-		*/
-	const oldHobbies = this.state.hobbies.filter(
-      (elem, index) => {
-        return (elem !== hobby) ? elem : null;
-      }
-    );	
-		
-		this.setState({
-			hobbies: oldHobbies
-		});
+  
+  removeToy(key) {
+    const toies = {...this.state.toies};
+   
+    toies[key] = null;
+      
+    
+    this.setState({toies});
 	}
-  getDataFromServer() {
-    console.log("--- GETTING DATA ---");
-     fetch('https://jsonplaceholder.typicode.com/todos')
-     .then(response => {
-       return response.json(); // transforme le json texte en objet js
-     })
-     .then(data => { // data c'est le texte json de response ci-dessus
-       let newHobbies = [];
-       data.forEach((el) => {
-         newHobbies.push(el.title);
-       });
-
-       this.setState({
-        hobbies: newHobbies
-      });
-       
-     }).catch(err => {
-       console.log("erreur dans le get : " + err)
-     });
-
-  }
 
   componentWillMount() {
     console.log("Component will mount");
     // on va chercher des donnees sur le Web avec fetch, comme
     // on a fait avec VueJS
-    this.getDataFromServer();
+    //this.getDataFromServer();
+
+    this.ref = base.syncState("toies", {
+      context: this,
+      state: 'toies'
+    });
+    console.log(""+this.state.toies);
+
+  }
+
+  componentWillUnmount() {
+    base.removeBinding(this.ref);
   }
   
   render() {
     console.log("render");
-    let list = this.state.hobbies.map(
-			(el) => {
-				return <li onClick={() => this.removeHobby(el)} key={el}>{el}</li>
-			}
-    );
-    
-    let listAvecComponent = 
-				this.state.hobbies.map((el, index) => {
-				return <Hobby 
-								 name={el}
-								 key={index} 
-                 removeHobby={this.removeHobby.bind(this)} 
-								 />
-			}
-    );
-    
     return (
       <div className="App">
-        <h3>Liste des Hobbies :</h3>
-        <input 
-					type="text" 
-					ref={(input) => this.input = input}
-					
-					/>
-				<button onClick={() => this.addHobby()}>Add Hobby</button>
-        <p style={{color: (this.state.hobbies.length < 5) ? 'green' : 'red'}}>
-            Nombre de Hobbies : {this.state.hobbies.length}
-        </p>
-        <ul>
-          {listAvecComponent}
-        </ul>
+        <h3>List of Toies :</h3>        
+        <ToyForm addToy={this.addToy.bind(this)} toyModel={this.state.toyModel}/>
         
-        <p>Un composant User ci-dessous:</p>
-        <User name="Michel Buffa"/>
-        <User name="Gabriel Mopolo"/>
+        <div class="col-md-12">
+              <h3 class="header">Favorites</h3>
+            </div>
+          <div class="container">
+              <div class="bloc-product-content">
+                <ul>
+                  <Toies toies={this.state.toies}  removeToy={this.removeToy.bind(this)} addToBasket={this.addToBasket.bind(this)}/>
+                </ul>
+              </div>
+              <div class="cart">
+
+              <div class="shopping-cart">
+                  <div class="title">
+                    Shopping Bag
+                  </div>
+                  <div class="info-cart">
+                      <div class="total">$ {this.state.amount}</div>
+                      <div class="commande">
+                          <button class="order-btn" onClick={()=>this.order()}>ORDER NOW</button>
+                      </div>
+                  </div>
+                <Cart basket={this.state.basket} removeToBasket={this.removeToBasket.bind(this)}/>
+
+                </div>
+              </div>
+        </div>
+        
       </div>
     );
   }
