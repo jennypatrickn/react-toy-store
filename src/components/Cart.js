@@ -1,3 +1,4 @@
+//https://github.com/NjaraFidimanana/react-toy-store.git
 import React, { Component } from 'react';
  import '../assets/Cart.css';
  function Cart(props) {
@@ -21,11 +22,11 @@ import React, { Component } from 'react';
             </div>
         
             <div class="quantity">
-                <button class="plus-btn" type="button" name="button">
+                <button class="plus-btn" type="button" name="button" onClick={()=>props.updateQuantity(key,true)}>
                 <img src="img/add.png" alt="" />
                 </button>
                 <input type="text" name="name" value={cart.quantity}/>
-                <button class="minus-btn" type="button" name="button">
+                <button class="minus-btn" type="button" name="button" onClick={()=>props.updateQuantity(key,false)}>
                 <img src="img/minus.png" alt="" />
                 </button>
             </div>

@@ -1,3 +1,5 @@
+//https://github.com/NjaraFidimanana/react-toy-store.git
+
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -42,6 +44,25 @@ class App extends Component {
       
       this.setState({toies});
       console.log("Test Test ");
+  }
+
+  updateQuantity(key,plus){
+    const basket ={...this.state.basket};
+    var b=basket[key];
+    if(plus){
+      
+      b.quantity=b.quantity+1;
+
+      this.state.amount=this.state.amount+parseInt(basket[key].price);
+    }
+    else{
+      if(b.quantity>0){
+        b.quantity=b.quantity-1;
+        this.state.amount=this.state.amount-parseInt(basket[key].price);
+      }    
+    }
+
+    this.setState({basket});
   }
 
 
@@ -111,8 +132,7 @@ class App extends Component {
   render() {
     console.log("render");
     return (
-      <div className="App">
-        <h3>List of Toies :</h3>        
+      <div className="App">      
         <ToyForm addToy={this.addToy.bind(this)} toyModel={this.state.toyModel}/>
         
         <div class="col-md-12">
@@ -136,7 +156,7 @@ class App extends Component {
                           <button class="order-btn" onClick={()=>this.order()}>ORDER NOW</button>
                       </div>
                   </div>
-                <Cart basket={this.state.basket} removeToBasket={this.removeToBasket.bind(this)}/>
+                <Cart basket={this.state.basket} removeToBasket={this.removeToBasket.bind(this)} updateQuantity={this.updateQuantity.bind(this)}/>
 
                 </div>
               </div>
